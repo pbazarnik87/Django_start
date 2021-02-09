@@ -20,7 +20,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '$+o#6^u4gkl*53jg_94(pgk5t*1mz-g45tpli!rpe5*v)p8+o8'
+# SECURITY WARNING: keep the secret key used in production secret!
+import sys, os
+
+def find_or_create_secret_key():
+    """
+    Look for secret_key.py and return the SECRET_KEY entry in it if the file exists.
+    Otherwise, generate a new secret key, save it in secret_key.py, and return the key.
+    """
+    SECRET_KEY_DIR = os.path.dirname(__file__)
+    SECRET_KEY_FILEPATH = os.path.join(SECRET_KEY_DIR, 'secret_key.py')
+    sys.path.insert(1,SECRET_KEY_DIR)
+
+    if os.path.isfile(SECRET_KEY_FILEPATH):
+        from secret_key import SECRET_KEY
+        return SECRET_KEY
+    else:
+        from django.utils.crypto import get_random_string
+        chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&amp;*(-_=+)'
+        new_key = get_random_string(50, chars)
+        with open(SECRET_KEY_FILEPATH, 'w') as f:
+            f.write("# Django secret key\n# Do NOT check this into version control.\n\nSECRET_KEY = '%s'\n" % new_key)
+        from secret_key import SECRET_KEY
+        return SECRET_KEY
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = find_or_create_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
