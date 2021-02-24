@@ -1,3 +1,4 @@
 secret_key.py
 db.sqlite3
+/venv
 .idea/
